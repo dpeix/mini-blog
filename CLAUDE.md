@@ -56,18 +56,43 @@ docker compose exec php bin/phpunit tests/Integration
 - **matomo** — `matomo:latest` — Analytics web (port 8080)
 - **matomo-db** — `mariadb` — Base dédiée Matomo (indépendante de PostgreSQL)
 
-## Entité
+## Entités
 
-### Article
+### Users (`App\Entity\Users`)
 
-| Champ     | Type     | Notes                          |
-|-----------|----------|--------------------------------|
-| id        | int      | Auto-generated                 |
-| title     | string   | Required                       |
-| slug      | string   | Unique, généré depuis le titre |
-| content   | text     | Corps de l'article             |
-| likes     | int      | Défaut: 0                      |
-| createdAt | datetime | Auto-set à la création         |
+Implémente `UserInterface` et `PasswordAuthenticatedUserInterface` (Symfony Security).
+
+| Champ     | Type               | Contraintes                        | Notes                          |
+|-----------|--------------------|------------------------------------|--------------------------------|
+| id        | int                | Auto-généré, non null              |                                |
+| username  | string(180)        | `NotBlank`, unique                 |                                |
+| roles     | array (json)       | —                                  | Défaut: `[]`, `ROLE_USER` garanti |
+| password  | string             | `NotBlank`                         | Stocké hashé                   |
+| email     | string(255)        | `NotBlank`, `Email`                |                                |
+| createdAt | DateTimeImmutable  | Non null                           | Auto-set dans le constructeur  |
+| articles  | Collection\<Article\> | —                               | OneToMany (inverse side)       |
+
+### Article (`App\Entity\Article`)
+
+| Champ     | Type               | Contraintes                        | Notes                          |
+|-----------|--------------------|------------------------------------|--------------------------------|
+| id        | int                | Auto-généré, non null              |                                |
+| title     | string(255)        | `NotBlank`                         |                                |
+| slug      | string(255)        | `NotBlank`, unique                 | Généré depuis le titre         |
+| content   | text               | `NotBlank`                         |                                |
+| likes     | int                | `PositiveOrZero`, non null         | Défaut: `0`                    |
+| createdAt | DateTimeImmutable  | Non null                           | Auto-set dans le constructeur  |
+| users     | Users              | `NotNull`                          | ManyToOne (owning side)        |
+
+### Relation
+
+```
+Users (1) ──── (*) Article
+  OneToMany          ManyToOne
+  (inversedBy)       (mappedBy: 'users')
+```
+
+Un `Users` peut avoir plusieurs `Article`. Un `Article` est obligatoirement relié à un `Users` existant.
 
 ## Fonctionnalités
 
@@ -116,13 +141,14 @@ docker compose exec php bin/phpunit tests/Integration
 
 ## Ordre de développement
 
-1. Ajouter Redis, Matomo, MariaDB dans `compose.yaml`
-2. Créer l'entité Article + migrations
-3. Tests fonctionnels du CRUD → puis controllers et templates Twig
-4. CSS responsive fait main
-5. Stimulus controllers (like, search, darkmode, stats)
-6. Tests unitaires du cache → puis configuration Redis et logique d'invalidation
-7. Tests du service Matomo → puis intégration tracking + API + dashboard admin
+1. ✅ Ajouter Redis, Matomo, MariaDB dans `compose.yaml`
+2. ✅ Créer les entités `Users` et `Article` + tests unitaires
+3. ✅ Migrations Doctrine (`make:migration` + `doctrine:migrations:migrate`)
+4. Tests fonctionnels du CRUD → puis controllers et templates Twig
+5. CSS responsive fait main
+6. Stimulus controllers (like, search, darkmode, stats)
+7. Tests unitaires du cache → puis configuration Redis et logique d'invalidation
+8. Tests du service Matomo → puis intégration tracking + API + dashboard admin
 
 ## Commandes utiles
 
