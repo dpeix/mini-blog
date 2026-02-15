@@ -144,7 +144,7 @@ Un `Users` peut avoir plusieurs `Article`. Un `Article` est obligatoirement reli
 1. ✅ Ajouter Redis, Matomo, MariaDB dans `compose.yaml`
 2. ✅ Créer les entités `Users` et `Article` + tests unitaires
 3. ✅ Migrations Doctrine (`make:migration` + `doctrine:migrations:migrate`)
-4. Tests fonctionnels du CRUD → puis controllers et templates Twig
+4. ✅ Tests fonctionnels du CRUD → puis controllers et templates Twig
 5. CSS responsive fait main
 6. Stimulus controllers (like, search, darkmode, stats)
 7. Tests unitaires du cache → puis configuration Redis et logique d'invalidation
