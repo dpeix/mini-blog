@@ -41,7 +41,6 @@ final class ArticleController extends AbstractController
         }
 
         if ($form->isSubmitted() && $form->isValid()) {
-
             $em->persist($article);
             $em->flush();
 

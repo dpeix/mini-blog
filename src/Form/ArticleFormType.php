@@ -27,6 +27,7 @@ class ArticleFormType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Article::class,
+            'validation_groups' => ['create'],
         ]);
     }
 }

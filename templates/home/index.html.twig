@@ -1,26 +1,33 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Mini-Blog — Accueil{% endblock %}
+{% block title %}Mini-Blog{% endblock %}
 
 {% block body %}
     <section class="hero">
-        <h1>Welcome to Mini-Blog</h1>
-        <p>Thoughts, tutorials, and stories.</p>
-        <a href="{{ path('app_article_list') }}" class="btn btn-primary">Browse all articles</a>
+        <p class="hero-eyebrow">Blog personnel</p>
+        <h1>Thoughts, tutorials<br>and <em>stories</em></h1>
+        <p class="hero-desc">A personal space to explore ideas, share knowledge, and document the creative journey.</p>
+        <div class="hero-line"></div>
     </section>
 
-    <section class="latest-articles">
-        <h2>Latest Articles</h2>
+    <section class="latest-articles reveal">
+        <div class="section-label">Recent articles</div>
         <div class="articles-grid">
             {% for article in articles %}
                 <article class="article-card">
-                    <h3><a href="{{ path('app_article_show', {slug: article.slug}) }}">{{ article.title }}</a></h3>
-                    <time datetime="{{ article.createdAt|date('Y-m-d') }}">{{ article.createdAt|date('d M Y') }}</time>
-                    <p>{{ article.content|slice(0, 150) }}...</p>
-                    <span class="likes">&hearts; {{ article.likes }}</span>
+                    <div class="article-card-img"></div>
+                    <div class="article-card-content">
+                        <h3><a href="{{ path('app_article_show', {slug: article.slug}) }}">{{ article.title }}</a></h3>
+                        <p>{{ article.content|slice(0, 120) }}...</p>
+                        <div class="article-meta">
+                            <span>{{ article.createdAt|date('d M Y') }}</span>
+                            <div class="meta-dot"></div>
+                            <span>{{ article.users.username }}</span>
+                        </div>
+                    </div>
                 </article>
             {% else %}
-                <p>No articles yet.</p>
+                <p class="hero-desc">No articles yet.</p>
             {% endfor %}
         </div>
     </section>

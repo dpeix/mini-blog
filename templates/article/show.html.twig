@@ -7,16 +7,17 @@
         <header class="article-header">
             <h1>{{ article.title }}</h1>
             <div class="article-meta">
-                <time datetime="{{ article.createdAt|date('Y-m-d') }}">{{ article.createdAt|date('d M Y') }}</time>
-                <span>by {{ article.users.username }}</span>
+                <span>{{ article.users.username }}</span>
+                <div class="meta-dot"></div>
+                <span>{{ article.createdAt|date('d M Y') }}</span>
             </div>
         </header>
         <div class="article-content">
             {{ article.content|nl2br }}
         </div>
         <footer class="article-footer">
-            <span class="likes">&hearts; {{ article.likes }} likes</span>
-            <a href="{{ path('app_article_list') }}" class="btn btn-secondary">&larr; Back to articles</a>
+            <span class="likes">&hearts; {{ article.likes }}</span>
+            <a href="{{ path('app_article_list') }}" class="btn btn-secondary">&larr; All articles</a>
         </footer>
     </article>
 {% endblock %}
