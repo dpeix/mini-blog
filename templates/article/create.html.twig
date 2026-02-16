@@ -1,0 +1,16 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New Article — Mini-Blog{% endblock %}
+
+{% block body %}
+    <section class="article-form-page">
+        <h1>Write a new article</h1>
+
+        {{ form_start(form, {'attr': {'class': 'article-form'}}) }}
+            {{ form_row(form.title) }}
+            {{ form_row(form.content) }}
+
+            <button type="submit" class="btn btn-primary">Publish</button>
+        {{ form_end(form) }}
+    </section>
+{% endblock %}

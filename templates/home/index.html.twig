@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mini-Blog — Accueil{% endblock %}
+
+{% block body %}
+    <section class="hero">
+        <h1>Welcome to Mini-Blog</h1>
+        <p>Thoughts, tutorials, and stories.</p>
+        <a href="{{ path('app_article_list') }}" class="btn btn-primary">Browse all articles</a>
+    </section>
+
+    <section class="latest-articles">
+        <h2>Latest Articles</h2>
+        <div class="articles-grid">
+            {% for article in articles %}
+                <article class="article-card">
+                    <h3><a href="{{ path('app_article_show', {slug: article.slug}) }}">{{ article.title }}</a></h3>
+                    <time datetime="{{ article.createdAt|date('Y-m-d') }}">{{ article.createdAt|date('d M Y') }}</time>
+                    <p>{{ article.content|slice(0, 150) }}...</p>
+                    <span class="likes">&hearts; {{ article.likes }}</span>
+                </article>
+            {% else %}
+                <p>No articles yet.</p>
+            {% endfor %}
+        </div>
+    </section>
+{% endblock %}

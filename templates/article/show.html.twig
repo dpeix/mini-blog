@@ -1,0 +1,22 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ article.title }} — Mini-Blog{% endblock %}
+
+{% block body %}
+    <article class="article-full">
+        <header class="article-header">
+            <h1>{{ article.title }}</h1>
+            <div class="article-meta">
+                <time datetime="{{ article.createdAt|date('Y-m-d') }}">{{ article.createdAt|date('d M Y') }}</time>
+                <span>by {{ article.users.username }}</span>
+            </div>
+        </header>
+        <div class="article-content">
+            {{ article.content|nl2br }}
+        </div>
+        <footer class="article-footer">
+            <span class="likes">&hearts; {{ article.likes }} likes</span>
+            <a href="{{ path('app_article_list') }}" class="btn btn-secondary">&larr; Back to articles</a>
+        </footer>
+    </article>
+{% endblock %}
