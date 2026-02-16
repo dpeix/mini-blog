@@ -255,6 +255,33 @@ body.dark-mode .icon-moon { display: none; }
     letter-spacing: -0.02em;
 }
 
+/* --- SEARCH BAR --- */
+.search-bar {
+    margin-bottom: 2rem;
+}
+
+.search-bar input {
+    width: 100%;
+    max-width: 400px;
+    padding: 0.75rem 1.2rem;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.9rem;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    background: var(--card-bg);
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.search-bar input::placeholder {
+    color: var(--muted);
+}
+
+.search-bar input:focus {
+    border-color: var(--accent);
+}
+
 /* --- ARTICLES GRID --- */
 .articles-grid {
     display: grid;
@@ -279,6 +306,10 @@ body.dark-mode .icon-moon { display: none; }
 .article-card:nth-child(4) { animation-delay: 0.15s; }
 .article-card:nth-child(5) { animation-delay: 0.25s; }
 .article-card:nth-child(6) { animation-delay: 0.35s; }
+
+.article-card.hidden {
+    display: none;
+}
 
 .article-card:hover {
     transform: translateY(-4px);
@@ -420,6 +451,47 @@ body.dark-mode .tag {
     color: var(--accent);
     font-family: 'IBM Plex Mono', monospace;
     font-size: 0.85rem;
+}
+
+/* --- LIKE BUTTON --- */
+.like-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 0.5rem 1.2rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.like-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.like-btn.liked {
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+.like-btn.liked .like-icon {
+    animation: pulse 0.4s ease;
+}
+
+.like-icon {
+    font-size: 1rem;
+    line-height: 1;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.3); }
+    100% { transform: scale(1); }
 }
 
 /* --- BUTTONS --- */

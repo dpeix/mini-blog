@@ -7,10 +7,17 @@
         <h1>Articles</h1>
     </section>
 
-    <section class="articles-section">
+    <section class="articles-section" data-controller="search">
+        <div class="search-bar">
+            <input type="text"
+                   placeholder="Search articles..."
+                   data-search-target="input"
+                   data-action="input->search#filter"
+                   value="{{ query|default('') }}">
+        </div>
         <div class="articles-grid">
             {% for article in articles %}
-                <article class="article-card">
+                <article class="article-card" data-search-target="card">
                     <div class="article-card-img"></div>
                     <div class="article-card-content">
                         <h3><a href="{{ path('app_article_show', {slug: article.slug}) }}">{{ article.title }}</a></h3>
