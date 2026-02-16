@@ -16,7 +16,13 @@
             {{ article.content|nl2br }}
         </div>
         <footer class="article-footer">
-            <span class="likes">&hearts; {{ article.likes }}</span>
+            <button class="like-btn"
+                    data-controller="like"
+                    data-like-url-value="{{ path('app_article_like', {id: article.id}) }}"
+                    data-action="click->like#like">
+                <span class="like-icon">&hearts;</span>
+                <span data-like-target="count">{{ article.likes }}</span>
+            </button>
             <a href="{{ path('app_article_list') }}" class="btn btn-secondary">&larr; All articles</a>
         </footer>
     </article>

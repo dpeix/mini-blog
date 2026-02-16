@@ -7,6 +7,7 @@ use App\Form\ArticleFormType;
 use App\Repository\ArticleRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -17,12 +18,16 @@ use Symfony\Component\String\Slugger\SluggerInterface;
 final class ArticleController extends AbstractController
 {
     #[Route('', name: 'app_article_list')]
-    public function list(ArticleRepository $articleRepository): Response
+    public function list(Request $request, ArticleRepository $articleRepository): Response
     {
-        $articles = $articleRepository->findBy([], ['createdAt' => 'DESC']);
+        $query = $request->query->getString('q');
+        $articles = $query !== ''
+            ? $articleRepository->searchByTitle($query)
+            : $articleRepository->findBy([], ['createdAt' => 'DESC']);
 
         return $this->render('article/list.html.twig', [
             'articles' => $articles,
+            'query' => $query,
         ]);
     }
 
@@ -50,6 +55,15 @@ final class ArticleController extends AbstractController
         return $this->render('article/create.html.twig', [
             'form' => $form,
         ]);
+    }
+
+    #[Route('/{id}/like', name: 'app_article_like', methods: ['POST'])]
+    public function like(Article $article, EntityManagerInterface $em): JsonResponse
+    {
+        $article->setLikes($article->getLikes() + 1);
+        $em->flush();
+
+        return new JsonResponse(['likes' => $article->getLikes()]);
     }
 
     #[Route('/{slug}', name: 'app_article_show')]
