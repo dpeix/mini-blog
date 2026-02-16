@@ -2,6 +2,7 @@
 
 namespace App\Tests\Functional\SecurityController;
 
+use App\Entity\Article;
 use App\Entity\Users;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -16,9 +17,11 @@ class LoginTest extends WebTestCase
         $this->client = static::createClient();
         $container = static::getContainer();
         $em = $container->get('doctrine.orm.entity_manager');
-        $userRepository = $em->getRepository(Users::class);
 
-        foreach ($userRepository->findAll() as $user) {
+        foreach ($em->getRepository(Article::class)->findAll() as $article) {
+            $em->remove($article);
+        }
+        foreach ($em->getRepository(Users::class)->findAll() as $user) {
             $em->remove($user);
         }
         $em->flush();

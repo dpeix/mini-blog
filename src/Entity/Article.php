@@ -16,15 +16,14 @@ class Article
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Assert\NotBlank]
+    #[Assert\NotBlank(groups: ['Default', 'create'])]
     private ?string $title = null;
 
     #[ORM\Column(length: 255, unique: true)]
-    #[Assert\NotBlank]
     private ?string $slug = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    #[Assert\NotBlank]
+    #[Assert\NotBlank(groups: ['Default', 'create'])]
     private ?string $content = null;
 
     #[ORM\Column]

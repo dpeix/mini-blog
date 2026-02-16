@@ -1,0 +1,34 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mini-Blog{% endblock %}
+
+{% block body %}
+    <section class="hero">
+        <p class="hero-eyebrow">Blog personnel</p>
+        <h1>Thoughts, tutorials<br>and <em>stories</em></h1>
+        <p class="hero-desc">A personal space to explore ideas, share knowledge, and document the creative journey.</p>
+        <div class="hero-line"></div>
+    </section>
+
+    <section class="latest-articles reveal">
+        <div class="section-label">Recent articles</div>
+        <div class="articles-grid">
+            {% for article in articles %}
+                <article class="article-card">
+                    <div class="article-card-img"></div>
+                    <div class="article-card-content">
+                        <h3><a href="{{ path('app_article_show', {slug: article.slug}) }}">{{ article.title }}</a></h3>
+                        <p>{{ article.content|slice(0, 120) }}...</p>
+                        <div class="article-meta">
+                            <span>{{ article.createdAt|date('d M Y') }}</span>
+                            <div class="meta-dot"></div>
+                            <span>{{ article.users.username }}</span>
+                        </div>
+                    </div>
+                </article>
+            {% else %}
+                <p class="hero-desc">No articles yet.</p>
+            {% endfor %}
+        </div>
+    </section>
+{% endblock %}
