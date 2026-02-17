@@ -169,7 +169,7 @@ docker compose exec php bin/console make:migration
 docker compose exec php bin/console cache:clear
 
 # Accès Matomo
-# http://localhost:8080 (une fois le service ajouté)
+http://localhost:8080
 ```
 
 ## Conventions
