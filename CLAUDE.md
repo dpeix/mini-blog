@@ -147,7 +147,7 @@ Un `Users` peut avoir plusieurs `Article`. Un `Article` est obligatoirement reli
 4. ✅ Tests fonctionnels du CRUD → puis controllers et templates Twig
 5. ✅ CSS responsive fait main
 6. ✅ Stimulus controllers (like, search, darkmode, stats)
-7. Tests unitaires du cache → puis configuration Redis et logique d'invalidation
+7. ✅ Tests unitaires du cache → puis configuration Redis et logique d'invalidation
 8. Tests du service Matomo → puis intégration tracking + API + dashboard admin
 
 ## Commandes utiles
