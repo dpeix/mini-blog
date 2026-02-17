@@ -21,3 +21,12 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+    App\Service\ArticleCacheService:
+        arguments:
+            $redisUrl: '%env(REDIS_URL)%'
+
+    App\Session\FallbackSessionHandler:
+        arguments:
+            $redisUrl: '%env(REDIS_URL)%'
+            $savePath: '%kernel.project_dir%/var/sessions'

@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Article;
 use App\Form\ArticleFormType;
 use App\Repository\ArticleRepository;
+use App\Service\ArticleCacheService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -33,7 +34,7 @@ final class ArticleController extends AbstractController
 
     #[Route('/new', name: 'app_article_create')]
     #[IsGranted('ROLE_USER')]
-    public function create(Request $request, EntityManagerInterface $em, SluggerInterface $slugger): Response
+    public function create(Request $request, EntityManagerInterface $em, SluggerInterface $slugger, ArticleCacheService $cache): Response
     {
         $article = new Article();
         $form = $this->createForm(ArticleFormType::class, $article);
@@ -48,6 +49,7 @@ final class ArticleController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $em->persist($article);
             $em->flush();
+            $cache->invalidateOnCreate();
 
             return $this->redirectToRoute('app_article_show', ['slug' => $article->getSlug()]);
         }
@@ -58,12 +60,18 @@ final class ArticleController extends AbstractController
     }
 
     #[Route('/{id}/like', name: 'app_article_like', methods: ['POST'])]
-    public function like(Article $article, EntityManagerInterface $em): JsonResponse
+    public function like(Article $article, EntityManagerInterface $em, ArticleCacheService $cache): JsonResponse
     {
-        $article->setLikes($article->getLikes() + 1);
-        $em->flush();
+        $cache->initLikes($article->getId(), $article->getLikes());
+        $newCount = $cache->incrementLike($article->getId());
 
-        return new JsonResponse(['likes' => $article->getLikes()]);
+        if ($newCount === null) {
+            $article->setLikes($article->getLikes() + 1);
+            $em->flush();
+            $newCount = $article->getLikes();
+        }
+
+        return new JsonResponse(['likes' => $newCount]);
     }
 
     #[Route('/{slug}', name: 'app_article_show')]
