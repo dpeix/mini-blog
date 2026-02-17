@@ -1,51 +1,136 @@
-# Symfony Docker
+# Mini-Blog
 
-A [Docker](https://www.docker.com/)-based installer and runtime for the [Symfony](https://symfony.com) web framework,
-with [FrankenPHP](https://frankenphp.dev) and [Caddy](https://caddyserver.com/) inside!
+Blog personnel avec dashboard analytics intégré, construit avec Symfony 8. Chaque technologie utilisée répond à un besoin concret — rien n'est artificiel.
 
-![CI](https://github.com/dunglas/symfony-docker/workflows/CI/badge.svg)
+## Stack technique
 
-## Getting Started
+| Technologie | Rôle | Pourquoi |
+|---|---|---|
+| **Symfony 8** | Framework PHP | Routing, Security, Doctrine ORM, formulaires, validation — tout le socle applicatif |
+| **FrankenPHP / Caddy** | Serveur web | Serveur PHP moderne avec HTTPS automatique, HTTP/3 et worker mode pour des performances élevées |
+| **PostgreSQL 16** | Base de données | Stockage des utilisateurs et articles, requêtes relationnelles (likes, tri, recherche) |
+| **Redis 7** | Cache applicatif | Cache des articles populaires (top 5) et des derniers articles, compteur de likes en temps réel |
+| **Matomo** | Analytics web | Alternative self-hosted à Google Analytics — visiteurs uniques, pages vues, articles populaires |
+| **MariaDB 11** | Base Matomo | Base de données dédiée à Matomo, indépendante de PostgreSQL |
+| **Twig** | Moteur de templates | Héritage de templates, blocs, partials — rendu HTML côté serveur |
+| **Stimulus** | JavaScript | Interactions dynamiques sans SPA — likes AJAX, recherche temps réel, dark mode, stats |
+| **AssetMapper** | Gestion des assets | Import JS natif via `importmap.php`, sans Webpack ni Vite |
+| **CSS fait main** | Styles | Design responsive custom avec variables CSS, dark mode, animations — sans framework CSS |
 
-1. If not already done, [install Docker Compose](https://docs.docker.com/compose/install/) (v2.10+)
-2. Run `docker compose build --pull --no-cache` to build fresh images
-3. Run `docker compose up --wait` to set up and start a fresh Symfony project
-4. Open `https://localhost` in your favorite web browser and [accept the auto-generated TLS certificate](https://stackoverflow.com/a/15076602/1352334)
-5. Run `docker compose down --remove-orphans` to stop the Docker containers.
+## Fonctionnalites
 
-## Features
+### Partie publique
 
-- Production, development and CI ready
-- Just 1 service by default
-- Blazing-fast performance thanks to [the worker mode of FrankenPHP](https://frankenphp.dev/docs/worker/)
-- [Installation of extra Docker Compose services](docs/extra-services.md) with Symfony Flex
-- Automatic HTTPS (in dev and prod)
-- HTTP/3 and [Early Hints](https://symfony.com/blog/new-in-symfony-6-3-early-hints) support
-- Real-time messaging thanks to a built-in [Mercure hub](https://symfony.com/doc/current/mercure.html)
-- [Vulcain](https://vulcain.rocks) support
-- Native [XDebug](docs/xdebug.md) integration
-- Super-readable configuration
+- **Liste des articles** avec recherche/filtre en temps réel (Stimulus `search_controller`)
+- **Lecture d'un article** avec slug URL-friendly
+- **Likes en AJAX** — le compteur se met à jour sans rechargement (Stimulus `like_controller`, cache Redis)
+- **Dark mode** avec persistance localStorage (Stimulus `darkmode_controller`)
+- **Animations au scroll** — les éléments apparaissent progressivement via IntersectionObserver (`reveal_controller`)
 
-**Enjoy!**
+### Partie admin (protégée par Symfony Security)
 
-## Docs
+- CRUD complet des articles
+- Dashboard analytics avec données Matomo (visiteurs, pages vues, articles populaires)
+- Inscription et connexion utilisateur
 
-1. [Options available](docs/options.md)
-2. [Using Symfony Docker with an existing project](docs/existing-project.md)
-3. [Support for extra services](docs/extra-services.md)
-4. [Deploying in production](docs/production.md)
-5. [Debugging with Xdebug](docs/xdebug.md)
-6. [TLS Certificates](docs/tls.md)
-7. [Using MySQL instead of PostgreSQL](docs/mysql.md)
-8. [Using Alpine Linux instead of Debian](docs/alpine.md)
-9. [Using a Makefile](docs/makefile.md)
-10. [Updating the template](docs/updating.md)
-11. [Troubleshooting](docs/troubleshooting.md)
+## Architecture Docker
 
-## License
+Le projet tourne entièrement sous Docker avec 5 services :
 
-Symfony Docker is available under the MIT License.
+```
+php            FrankenPHP + Caddy       → ports 80/443 (HTTPS auto)
+database       PostgreSQL 16            → données applicatives
+redis          Redis 7 Alpine           → cache et compteurs de likes
+matomo         Matomo                   → analytics (port 8080)
+matomo-db      MariaDB 11              → base dédiée Matomo
+```
+
+## Ou chaque technologie intervient
+
+### Symfony 8
+
+Le framework structure toute l'application :
+
+- **Controllers** — `HomeController` (accueil), `ArticleController` (CRUD, likes, recherche), `SecurityController` (auth)
+- **Entités Doctrine** — `Users` et `Article` avec relation OneToMany
+- **Security** — authentification par formulaire, protection des routes admin par `ROLE_USER`
+- **Validation** — contraintes sur les entités (`NotBlank`, `Email`, `PositiveOrZero`)
+
+### Redis
+
+Utilisé pour le cache applicatif et les compteurs via `ArticleCacheService` :
+
+- **Compteur de likes** — incrémenté directement dans Redis (rapide), synchronisé vers PostgreSQL
+- **Top 5 articles** — cache des articles les plus likés (TTL 1h)
+- **Derniers articles** — cache de la homepage (TTL 1h)
+- **Invalidation** — le cache se vide automatiquement à la création, modification ou like d'un article
+- **Fallback** — si Redis est indisponible, le controller interroge directement la base
+
+### Stimulus
+
+4 controllers JavaScript légers, chacun avec une responsabilité unique :
+
+| Controller | Fichier | Ce qu'il fait |
+|---|---|---|
+| `like` | `like_controller.js` | POST AJAX vers `/article/{id}/like`, met à jour le compteur sans reload |
+| `search` | `search_controller.js` | Filtre les cartes d'articles en temps réel sur `keyup` |
+| `darkmode` | `darkmode_controller.js` | Toggle une classe CSS sur `<body>`, persiste le choix dans localStorage |
+| `reveal` | `reveal_controller.js` | Anime l'apparition des éléments au scroll via IntersectionObserver |
+
+### CSS fait main
+
+Un seul fichier `app.css` (+ `login.css` pour l'authentification) :
+
+- Variables CSS pour le theming light/dark (`--bg`, `--text`, `--accent`...)
+- Grille responsive (3 → 2 → 1 colonnes)
+- Navigation fixe avec backdrop blur
+- Animations (`fadeUp`, `pulse` sur le bouton like)
+- Design glassmorphism pour les pages login/register
+
+### Matomo
+
+Analytics self-hosted intégré de deux façons :
+
+- **Tracking** — tag JavaScript dans `base.html.twig` pour collecter les visites
+- **API Reporting** — `MatomoApiService` interroge l'API Matomo pour afficher les stats dans le dashboard admin
+
+## Tests (TDD)
+
+Le développement suit le cycle **Rouge → Vert → Refactor**. Structure des tests :
+
+```
+tests/
+├── Unit/           # Services isolés (mock HttpClient pour Matomo, logique cache)
+├── Functional/     # Controllers HTTP (codes de réponse, redirections, persistance)
+└── Integration/    # Services réels contre Redis et PostgreSQL
+```
+
+```bash
+# Tous les tests
+docker compose exec php bin/phpunit
+
+# Par catégorie
+docker compose exec php bin/phpunit tests/Unit
+docker compose exec php bin/phpunit tests/Functional
+docker compose exec php bin/phpunit tests/Integration
+```
+
+## Demarrage rapide
+
+```bash
+# Cloner et lancer
+git clone <repo-url> mini-blog
+cd mini-blog
+docker compose up -d --wait
+
+# Migrations
+docker compose exec php bin/console doctrine:migrations:migrate
+
+# Accès
+# App       → https://localhost
+# Matomo    → http://localhost:8080
+```
 
 ## Credits
 
-Created by [Kévin Dunglas](https://dunglas.dev), co-maintained by [Maxime Helias](https://twitter.com/maxhelias) and sponsored by [Les-Tilleuls.coop](https://les-tilleuls.coop).
+Basé sur [symfony-docker](https://github.com/dunglas/symfony-docker) par Kévin Dunglas.
