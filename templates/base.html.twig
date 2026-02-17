@@ -30,6 +30,12 @@
         {% endblock %}
     </head>
     <body data-controller="reveal">
+        <div class="bg-shapes">
+            <div class="bg-shape bg-shape--blue"></div>
+            <div class="bg-shape bg-shape--orange"></div>
+            <div class="bg-shape bg-shape--purple"></div>
+        </div>
+
         <nav>
             <a href="{{ path('app_home') }}" class="logo">mini<span>.</span>blog</a>
             <ul class="nav-links">
@@ -41,17 +47,15 @@
                 {% else %}
                     <li><a href="{{ path('app_login') }}" class="nav-link-text">Login</a></li>
                 {% endif %}
-                <li>
-                    <button data-controller="darkmode" data-action="click->darkmode#toggle" class="darkmode-toggle" aria-label="Toggle dark mode">
-                        <span class="icon-sun">&#9788;</span>
-                        <span class="icon-moon">&#9790;</span>
-                    </button>
-                </li>
             </ul>
         </nav>
 
         <main>
             {% block body %}{% endblock %}
         </main>
+
+        <footer>
+            <p>&copy; {{ "now"|date("Y") }} mini.blog</p>
+        </footer>
     </body>
 </html>
